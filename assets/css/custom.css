@@ -1,0 +1,83 @@
+:root {
+    --bg-primary: #12141c;
+    --bg-card: #1e2230;
+    --text-primary: #ffffff;
+    --text-muted: #a0aab2;
+    --border-color: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Card and Panel styling */
+.card, .modal-content, .dropdown-menu {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.card-header, .card-footer, .modal-header, .modal-footer {
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    background-color: #12141c;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+.form-control:focus, .form-select:focus {
+    background-color: #1a1d27;
+    border-color: #00c853;
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(0, 200, 83, 0.25);
+}
+
+/* Tables */
+.table {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+.table-hover tbody tr:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+.table thead th {
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* Text Colors override */
+.text-muted { color: var(--text-muted) !important; }
+
+/* Custom Badge adjustments */
+.badge {
+    padding: 0.4em 0.6em;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Print View override */
+@media print {
+    nav, footer, .no-print, .btn { display: none !important; }
+    
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    .invoice-container, .card {
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    
+    .text-white { color: #000000 !important; } 
+    .text-muted { color: #6c757d !important; }
+    .table, .table th, .table td { border-color: #dee2e6 !important; }
+}
