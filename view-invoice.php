@@ -1,5 +1,13 @@
 <?php
-require_once 'config/database.php';
+require_once __DIR__ . '/config/database.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if (!$id) {
@@ -37,10 +45,15 @@ include 'includes/header.php';
         <button class="btn btn-outline-secondary me-2" onclick="window.print()">
             <i class="bi bi-printer"></i> Print / PDF
         </button>
-        <?php if($invoice['status'] !== 'Paid'): ?>
-            <button class="btn btn-success fw-medium">
-                <i class="bi bi-check2-circle"></i> Mark as Paid
-            </button>
+        <?php if ($invoice['status'] !== 'Paid'): ?>
+            <form action="modules/mark-invoice-paid.php" method="POST" class="d-inline">
+                <input type="hidden" name="id" value="<?= (int)$invoice['id'] ?>">
+                <input type="hidden" name="csrf_token"
+                    value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                <button type="submit" class="btn btn-success fw-medium">
+                    <i class="bi bi-check2-circle"></i> Mark as Paid
+                </button>
+            </form>
         <?php endif; ?>
     </div>
 </div>
@@ -48,12 +61,12 @@ include 'includes/header.php';
 <div class="row justify-content-center">
     <div class="col-lg-10">
         <div class="card invoice-container p-5 mb-5 border-0 shadow-sm">
-            
+
             <!-- Invoice Header -->
             <div class="row mb-5">
                 <div class="col-sm-6">
                     <h2 class="fw-bold mb-0">
-                        <i class="bi bi-lightning-charge-fill text-success fs-3"></i> 
+                        <i class="bi bi-lightning-charge-fill text-success fs-3"></i>
                         <span class="text-white">Billing System</span>
                     </h2>
                     <p class="text-muted mt-2 mb-0">123 Business Road, Tech City<br>hello@billing-system.com<br>+1 (555) 123-4567</p>
@@ -74,7 +87,7 @@ include 'includes/header.php';
                 <div class="col-sm-6">
                     <h6 class="text-muted text-uppercase fw-bold mb-3">Billed To</h6>
                     <h5 class="fw-bold mb-1"><?= htmlspecialchars($invoice['company_name']) ?></h5>
-                    <?php if($invoice['contact_name']): ?>
+                    <?php if ($invoice['contact_name']): ?>
                         <p class="mb-1 text-muted"><?= htmlspecialchars($invoice['contact_name']) ?></p>
                     <?php endif; ?>
                     <p class="mb-1 text-muted"><?= nl2br(htmlspecialchars($invoice['billing_address'])) ?></p>
@@ -98,16 +111,16 @@ include 'includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($items as $item): ?>
-                        <tr class="border-bottom border-secondary border-opacity-10">
-                            <td class="ps-0 py-3">
-                                <h6 class="mb-1 fw-semibold text-white"><?= htmlspecialchars($item['item_name']) ?></h6>
-                                <span class="text-muted small"><?= nl2br(htmlspecialchars($item['item_description'])) ?></span>
-                            </td>
-                            <td class="text-end py-3"><?= number_format($item['quantity'], 2) ?></td>
-                            <td class="text-end py-3">$<?= number_format($item['unit_price'], 2) ?></td>
-                            <td class="text-end pe-0 py-3 fw-medium">$<?= number_format($item['line_total'], 2) ?></td>
-                        </tr>
+                        <?php foreach ($items as $item): ?>
+                            <tr class="border-bottom border-secondary border-opacity-10">
+                                <td class="ps-0 py-3">
+                                    <h6 class="mb-1 fw-semibold text-white"><?= htmlspecialchars($item['item_name']) ?></h6>
+                                    <span class="text-muted small"><?= nl2br(htmlspecialchars($item['item_description'])) ?></span>
+                                </td>
+                                <td class="text-end py-3"><?= number_format($item['quantity'], 2) ?></td>
+                                <td class="text-end py-3">$<?= number_format($item['unit_price'], 2) ?></td>
+                                <td class="text-end pe-0 py-3 fw-medium">$<?= number_format($item['line_total'], 2) ?></td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -120,17 +133,17 @@ include 'includes/header.php';
                         <span class="text-muted">Subtotal</span>
                         <span class="fw-medium">$<?= number_format($invoice['subtotal'], 2) ?></span>
                     </div>
-                    <?php if($invoice['tax_rate'] > 0): ?>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Tax (<?= floatval($invoice['tax_rate']) ?>%)</span>
-                        <span class="fw-medium">$<?= number_format($invoice['subtotal'] * ($invoice['tax_rate']/100), 2) ?></span>
-                    </div>
+                    <?php if ($invoice['tax_rate'] > 0): ?>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tax (<?= floatval($invoice['tax_rate']) ?>%)</span>
+                            <span class="fw-medium">$<?= number_format($invoice['subtotal'] * ($invoice['tax_rate'] / 100), 2) ?></span>
+                        </div>
                     <?php endif; ?>
-                    <?php if($invoice['discount_amount'] > 0): ?>
-                    <div class="d-flex justify-content-between mb-3 text-success">
-                        <span>Discount</span>
-                        <span>-$<?= number_format($invoice['discount_amount'], 2) ?></span>
-                    </div>
+                    <?php if ($invoice['discount_amount'] > 0): ?>
+                        <div class="d-flex justify-content-between mb-3 text-success">
+                            <span>Discount</span>
+                            <span>-$<?= number_format($invoice['discount_amount'], 2) ?></span>
+                        </div>
                     <?php endif; ?>
                     <div class="d-flex justify-content-between pt-3 border-top border-secondary border-opacity-50">
                         <h4 class="fw-bold mb-0">Total</h4>
@@ -140,11 +153,11 @@ include 'includes/header.php';
             </div>
 
             <!-- Notes -->
-            <?php if(!empty($invoice['notes'])): ?>
-            <div class="mt-4 pt-4 border-top border-secondary border-opacity-10">
-                <h6 class="text-muted text-uppercase fw-bold mb-2">Notes & Terms</h6>
-                <p class="text-muted small mb-0"><?= nl2br(htmlspecialchars($invoice['notes'])) ?></p>
-            </div>
+            <?php if (!empty($invoice['notes'])): ?>
+                <div class="mt-4 pt-4 border-top border-secondary border-opacity-10">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Notes & Terms</h6>
+                    <p class="text-muted small mb-0"><?= nl2br(htmlspecialchars($invoice['notes'])) ?></p>
+                </div>
             <?php endif; ?>
 
         </div>
