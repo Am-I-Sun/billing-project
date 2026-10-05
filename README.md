@@ -11,8 +11,6 @@
 
 ## 📸 Screenshots
 
-> *(Paste your screenshots here — see the [Screenshots Guide](#screenshots-guide) below)*
-
 | Login Page | Dashboard |
 |---|---|
 | ![Login](screenshots/login.png) | ![Dashboard](screenshots/dashboard.png) |
@@ -25,6 +23,8 @@
 |---|---|
 | ![Invoice](screenshots/view_invoice.png) | ![Products](screenshots/products.png) |
 
+Also, the installer:
+ ![Invoice](screenshots/installer_start.png) 
 ---
 
 ## 🚀 Features
